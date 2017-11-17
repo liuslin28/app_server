@@ -78,36 +78,43 @@ router.post('/addCart', function (req,res,next) {
     User.findOne({userId:userId},function (err,userDoc) {
         if(err){
             res.json({
-                status:'1',
-                msg: err.message
-            })
+                status:'1'
+                // msg: err.message
+            });
+            console.log("first");
         }else {
-            console.log("userID:"+userDoc);
+            // console.log("userID:"+userDoc);
             if (userDoc){
-                Goods.findOne({productId:productId},function (err1,doc1) {
+                Goods.findOne({productId:productId},function (err1,doc) {
                     if(err1){
                         res.json({
-                            status:'1',
-                            msg:err1.message
-                        })
+                            status:'1'
+                            // msg:err1.message
+                        });
+                        console.log("second");
                     }else {
-                        if(doc1){
+                        if(doc){
+                            console.log("3");
                             doc.productNum =1;
                             doc.checked=1;
-                            User.cartList.push(doc1);
-                            User.save(function (err2,doc2) {
+                            console.log("4");
+                            User.cartList.push(doc);
+                            console.log("5");
+                            User.save(function (err2,doc1) {
                                 if (err2){
                                     res.json({
-                                        status:'1',
-                                        msg:err2.message
-                                    })
+                                        status:'1'
+                                        // msg:err2.message
+                                    });
+                                    console.log("last");
                                 }else {
                                     res.json({
                                         status:'0',
                                         msg:'',
                                         result:'suc'
 
-                                    })
+                                    });
+                                    console.log("well done");
                                 }
                                 
                             })
