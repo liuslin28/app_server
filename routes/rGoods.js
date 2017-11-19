@@ -95,7 +95,7 @@ router.post('/addCart', function (req,res,next) {
                     }else {
                         if(doc){
                             console.log("3");
-                            doc.productNum =1;
+                            // doc.productNum =1;
                             doc.checked=1;
                             console.log("4");
                             User.cartList.push(doc);
