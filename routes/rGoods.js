@@ -18,7 +18,7 @@ mongoose.connection.on("cisconnected",function () {
   console.log("MongoDB connected disconnected.")
 });
 
-router.get("/", function (req,res,next) {
+router.get("/list", function (req,res,next) {
 
     let page = parseInt(req.param("page"));
     // 分页参数
@@ -71,17 +71,15 @@ router.get("/", function (req,res,next) {
 
 // 加入购物车
 router.post('/addCart', function (req,res,next) {
-    let userId = '100000077';
-    let productId = req.body.productId;
-    let User = require('../models/musers');
+    var userId = '100000077', productId = req.body.productId;
+    var User = require('../models/musers');
 
     User.findOne({userId:userId},function (err,userDoc) {
         if(err){
             res.json({
-                status:'1'
-                // msg: err.message
-            });
-            console.log("first");
+                status:'1',
+                msg: err.message
+            })
         }else {
             // console.log("userID:"+userDoc);
             if (userDoc){
