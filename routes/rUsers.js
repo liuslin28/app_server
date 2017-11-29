@@ -1,8 +1,8 @@
 var express = require('express');
 var router = express.Router();
-var Users = require('./../models/musers');
+var User = require('./../models/musers');
 
-/* GET users listing. */
+/* GET user listing. */
 router.get('/', function(req, res, next) {
   res.send('respond with a resource');
 });
@@ -13,7 +13,7 @@ router.post('/login',function (req,res,next) {
      userName: req.body.userName,
      userPwd: req.body.userPwd
    };
-   Users.findOne(param,function (err,doc) {
+   User.findOne(param,function (err,doc) {
      if(err) {
        res.json({
            status: '1',
@@ -73,8 +73,8 @@ router.get("/checkLogin",function (req,res,next) {
 
 //查询当前用户的购物车数据
 router.get("/cartList",function (req,res,next) {
-    var userId = req.cookies.userId;
-    Users.findOne({userId:userId},function (err,doc) {
+    let userId = req.cookies.userId;
+    User.findOne({userId:userId},function (err,doc) {
         if(err) {
             res.json({
                 status: '1',
@@ -93,6 +93,51 @@ router.get("/cartList",function (req,res,next) {
         
     })
 
+});
+
+// 购物车删除
+router.post("/cartDel",function (req,res,next) {
+   let userId = req.cookies.userId;
+   let productId = req.body.productId;
+   User.update({userId:userId},{$pull:{'cartList':{'productId':productId}}},function (err,doc) {
+       if(err){
+           res.json({
+               status:'1',
+               msg:err.message,
+               result:''
+           });
+       } else {
+           res.json({
+               status:'0',
+               msg:'',
+               result:'suc'
+           });
+       }
+   })
+});
+
+// 购物车数量增减
+router.post("/cartEdit", function (req,res,next) {
+   let userId = req.cookies.userId;
+   let productId = req.body.productId;
+   let productNum = req.body.productNum;
+   User.update({'userId':userId},{'cartList.productId':productId},{
+       'cartList.$.productNum': productNum
+   },function (err,doc) {
+       if(err){
+           res.json({
+               status:'1',
+               msg:err.message,
+               result:''
+           });
+       } else {
+           res.json({
+               status:'0',
+               msg:'',
+               result:'suc'
+           });
+       }
+   })
 });
 
 module.exports = router;
