@@ -121,6 +121,7 @@ router.post("/cartEdit", function (req,res,next) {
    let userId = req.cookies.userId;
    let productId = req.body.productId;
    let productNum = req.body.productNum;
+   let checked = req.body.checked;
    User.update({'userId':userId},{'cartList.productId':productId},{
        'cartList.$.productNum': productNum
    },function (err,doc) {
@@ -139,5 +140,40 @@ router.post("/cartEdit", function (req,res,next) {
        }
    })
 });
+
+router.post("/cartCheckAll",function (req,res,next) {
+    let userId = req.cookies.userId;
+    let checkAll = req.body.checkAll?'1':'0';
+    User.findOne({userId:userId},function (err,user) {
+        if(err){
+            res.json({
+                status:'1',
+                msg:err.message,
+                result:''
+            });
+        } else {
+            if(user) {
+                user.cartList.forEach((item) => {
+                    item.checked = checkAll;
+                });
+                user.save(function (err1,doc) {
+                    if(err1) {
+                        res.json({
+                            status:'1',
+                            msg:err1.message,
+                            result:''
+                        });
+                    } else {
+                        res.json({
+                            status:'0',
+                            msg:'',
+                            result:'suc'
+                        });
+                    }
+                })
+            }
+        }
+    })
+})
 
 module.exports = router;
