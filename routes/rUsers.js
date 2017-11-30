@@ -141,6 +141,7 @@ router.post("/cartEdit", function (req,res,next) {
    })
 });
 
+//全选
 router.post("/cartCheckAll",function (req,res,next) {
     let userId = req.cookies.userId;
     let checkAll = req.body.checkAll?'1':'0';
@@ -174,6 +175,106 @@ router.post("/cartCheckAll",function (req,res,next) {
             }
         }
     })
+});
+
+//查询用户地址接口
+router.get("/addressList",function (req,res,next) {
+    let userId = req.cookies.userId;
+    User.findOne({userId:userId},function (err,doc) {
+        if(err){
+            res.json({
+                status:'1',
+                msg:err.message,
+                result:''
+            });
+        } else {
+            res.json({
+                status:'0',
+                msg:'',
+                result: doc.addressList
+            });
+        }
+    })
+
+});
+
+// 设置默认地址
+router.post("/setDefault",function (req,res,next) {
+    let userId = req.cookies.userId;
+    let addressId = req.body.addressId;
+    if(!addressId) {
+        res.json({
+            status:'10001',
+            msg: 'addressId is null',
+            result:''
+        });
+    }  else {
+        User.findOne({userId:userId},function (err,doc) {
+            if(err) {
+                res.json({
+                    status:'1',
+                    msg:err.message,
+                    result:''
+                });
+            } else {
+                let addressList = doc.addressList;
+                console.log(addressList);
+                addressList.forEach((item)=>{
+                    console.log(item);
+                    if( item.addressId === addressId) {
+                        item.isDefault = true;
+                        console.log('1');
+                    } else {
+                        item.isDefault = false;
+                    }
+                });
+            }
+        });
+    }
+    doc.save(function (err1,doc1) {
+        if(err){
+            res.json({
+                status:'1',
+                msg:err.message,
+                result:''
+            });
+        }else{
+            res.json({
+                status:'0',
+                msg:'',
+                result:''
+            });
+        }
+    });
+
+});
+
+// 删除地址接口
+router.post("/users/delDefault",function (req,res.next) {
+   let userId = req.cookies.userId;
+   let addressId = req.body.addressId;
+   User.update({userId:userId},
+       {
+           $pull: {
+               'addressList': {
+                   'addressId': addressId
+               }
+           }
+       }, function (err,doc) {
+        if(err){
+            res.json({
+                status:'1',
+                msg:err.message,
+                result:''
+            });
+        }else{
+            res.json({
+                status:'0',
+                msg:'',
+                result:''
+            });
+        }
+   });
 })
 
 module.exports = router;
