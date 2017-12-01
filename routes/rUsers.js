@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var User = require('./../models/musers');
+require('./../util/util');
 
 /* GET user listing. */
 router.get('/', function(req, res, next) {
@@ -250,7 +251,7 @@ router.post("/setDefault",function (req,res,next) {
 });
 
 // 删除地址接口
-router.post("/users/delDefault",function (req,res.next) {
+router.post("/delDefault",function (req,res,next) {
    let userId = req.cookies.userId;
    let addressId = req.body.addressId;
    User.update({userId:userId},
@@ -275,6 +276,73 @@ router.post("/users/delDefault",function (req,res.next) {
             });
         }
    });
-})
+});
+
+//订单付款
+router.post("/payMent",function (req,res,next) {
+    let userId = req.cookies.userId;
+    let addressId = req.body.addressId;
+    let orderTotal = req.body.orderTotal;
+    User.findOne({userId:userId},function (err,doc){
+       if(err) {
+           res.json({
+               status:'1',
+               msg:err.message,
+               result:''
+           });
+       } else {
+           let address = '',
+               goodsList = [];
+           doc.addressList.forEach((item) => {
+               if(addressId === item.addressId) {
+                   address = item;
+                }
+           });
+           // 获取用户购物车的购买商品
+           doc.cartList.filter((item) => {
+               if(item.checked === 1) {
+                   goodsList.push(item);
+                }
+           });
+           // orderId的设置
+           let platform = '455';
+           let r1 = Math.floor(Math.random()*10);
+           let r2 = Math.floor(Math.random()*10);
+           let sysDate = new Date().Format('yyyyMMddhhmmss');
+           let orderId = platform + r1 + sysDate + r2;
+           // 生成时间
+           let creatDate = new Date().Format('yyyy-MM-dd hh:mm:ss')
+           let order ={
+               orderId:orderId,
+               orderTotal: orderTotal,
+               addressInfo: address,
+               goodsList: goodsList,
+               orderStatus: '0',
+               createDate: creatDate
+           };
+
+           doc.orderList.push(order);
+
+           doc.save(function (err1,doc1) {
+               if(err1){
+                   res.json({
+                       status:"1",
+                       msg:err.message,
+                       result:''
+                   });
+               }else{
+                   res.json({
+                       status:"0",
+                       msg:'',
+                       result:{
+                           orderId:order.orderId,
+                           orderTotal:order.orderTotal
+                       }
+                   });
+               }
+           });
+       }
+    });
+});
 
 module.exports = router;
