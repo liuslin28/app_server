@@ -71,55 +71,76 @@ router.get("/list", function (req,res,next) {
 
 // 加入购物车
 router.post('/addCart', function (req,res,next) {
-    var userId = '100000077', productId = req.body.productId;
-    var User = require('../models/musers');
-
+    let userId = '100000077', productId = req.body.productId;
+    let User = require('../models/musers');
     User.findOne({userId:userId},function (err,userDoc) {
-        if(err){
+        if (err) {
             res.json({
-                status:'1',
+                status: '1',
                 msg: err.message
             })
-        }else {
-            // console.log("userID:"+userDoc);
-            if (userDoc){
-                Goods.findOne({productId:productId},function (err1,doc) {
-                    if(err1){
-                        res.json({
-                            status:'1'
-                            // msg:err1.message
-                        });
-                        console.log("second");
-                    }else {
-                        if(doc){
-                            doc.productNum =1;
-                            doc.checked=1;
-                            User.cartList.push(doc);
-                            User.save(function (err2,doc1) {
-                                if (err2){
-                                    res.json({
-                                        status:'1'
-                                        // msg:err2.message
-                                    });
-                                    console.log("last");
-                                }else {
-                                    res.json({
-                                        status:'0',
-                                        msg:'',
-                                        result:'suc'
-
-                                    });
-                                    console.log("well done");
-                                }
-                                
-                            })
-                        }
+        } else {
+            // console.log(userDoc.cartList);
+            if (userDoc) {
+                let goodsItem = '';
+                userDoc.cartList.forEach(function (item) {
+                    if (item.productId == productId) {
+                        goodsItem = item;
+                        item.productNum++;
                     }
-                })
-
+                });
+                if (goodsItem) {
+                    userDoc.save(function (err1, doc1) {
+                        if (err1) {
+                            res.json({
+                                status: '1',
+                                msg: err1.message
+                            });
+                        } else {
+                            res.json({
+                                status: '0',
+                                msg: '',
+                                result: 'suc'
+                            });
+                        }
+                    });
+                } else {
+                    Goods.findOne({productId: productId}, function (err2, doc) {
+                        if (err2) {
+                            res.json({
+                                status: '1',
+                                msg:err1.message
+                            });
+                        } else {
+                            if (doc) {
+                                doc.productNum = 1;
+                                doc.checked = 1;
+                                userDoc.cartList.push(doc);
+                                userDoc.save(function (err3, doc1) {
+                                    if (err3) {
+                                        res.json({
+                                            status: '1'
+                                            // msg:err2.message
+                                        });
+                                        console.log("last");
+                                    } else {
+                                        res.json({
+                                            status: '0',
+                                            msg: '',
+                                            result: 'suc'
+                                        });
+                                    }
+                                });
+                            }
+                        }
+                    })
+                }
             }
         }
-    })
+    });
+
 });
+
+
 
 module.exports = router;
